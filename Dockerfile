@@ -25,20 +25,12 @@ RUN apt-get update && apt-get install -y \
 # Create a non-root user for the runner
 RUN useradd -m -s /bin/bash runner 
 
-# incase you need nopassword sudo rights for runner:
-# RUN echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# Switch to the runner user
 WORKDIR /home/runner
 
 # Download and install the GitHub Actions runner
 RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.312.0/actions-runner-linux-x64-2.312.0.tar.gz && \
 tar xzf actions-runner.tar.gz && \
 rm -f actions-runner.tar.gz
-
-# Copy a script to configure the runner
-COPY configure.sh /home/runner/configure.sh
-RUN chmod +x configure.sh
 
 # Copy the requirements file into the image
 COPY requirements.txt .

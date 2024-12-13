@@ -1,53 +1,62 @@
-### Self hosted github runner project
+# GitHub Runner Management Script
 
-## Creating runner with bash
+This script provides an interface to manage self-hosted GitHub Action runners using Docker. It supports building runner images, starting runners for repositories, and stopping them.
 
-```
-git clone git@github.com:tuomascode/GithubRunner.git
-cd GithubRunner
-docker build -t githubrunner .
-```
+## Prerequisites
 
-* Log into your github, navigate to your repository and get runner-token from settings
+- **Docker**: Ensure Docker is installed and running on your system.
+- **GitHub Personal Access Token (PAT)**: Generate a PAT with appropriate repository permissions for managing runners.
 
-set 
+## Usage
 
-developement command:
-```
-docker run -v $(pwd):/temp --workdir /temp --entrypoint bash -it --rm  \
-  -e GITHUB_PAT=$GITHUB_PAT \
-  -e GITHUB_PROJECT=$GITHUB_PROJECT \
-  -e GITHUB_PROJECT_OWNER=$GITHUB_PROJECT_OWNER \
-  githubrunner
+```bash
+./runner.sh <command> [options]
 ```
 
-runtime command 
-```
-docker run -d \
-  -e GITHUB_PAT=$GITHUB_PAT \
-  -e GITHUB_PROJECT=$GITHUB_PROJECT \
-  -e GITHUB_PROJECT_OWNER=$GITHUB_PROJECT_OWNER \
-  githubrunner
+### Commands
+
+- **build**: Build a Docker image for the specified project.
+- **start**: Start a self-hosted runner for the specified project.
+- **stop**: Stop the self-hosted runner for the specified project.
+
+### Options
+
+- `--help, -h`: Show help message and exit.
+- `--project-name, -n`: Specify the project name (required).
+- `--project-owner, -o`: Specify the project owner (required for `start` and `stop`).
+- `--github-pat, -g`: Specify the GitHub Personal Access Token (required for `start` and `stop`).
+
+## Examples
+
+### Build a Runner Image
+```bash
+./runner.sh build --project-name myproject
 ```
 
-```
-bash runner.sh build \
-  -n $GITHUB_PROJECT \
-  -o $GITHUB_PROJECT_OWNER \
-  -g $GITHUB_PAT
+### Start a Runner
+```bash
+./runner.sh start --project-name myproject --project-owner myusername --github-pat mygithubpat
 ```
 
-```
-bash runner.sh start -n $GITHUB_PROJECT
-```
-
-```
-bash runner.sh stop -n $GITHUB_PROJECT
+### Stop a Runner
+```bash
+./runner.sh stop --project-name myproject --project-owner myusername --github-pat mygithubpat
 ```
 
-```
-docker build \
-  --build-arg GITHUB_RUNNER_TOKEN="your_github_token" \
-  --build-arg REPO_URL="https://github.com/your/repository" \
-  -t github-runner:latest .
-```
+## Script Workflow
+
+1. **Build**:
+    - Verifies Docker is installed.
+    - Builds a Docker image tagged with the project name.
+2. **Start**:
+    - Checks if the Docker image for the project exists.
+    - Retrieves a registration token from GitHub for the repository.
+    - Starts a Docker container as a GitHub Actions runner.
+3. **Stop**:
+    - Finds and stops the running container for the specified project.
+    - Removes the runner from the GitHub repository.
+
+## Notes
+
+- Ensure your GitHub PAT has `repo` permissions for private repositories or `public_repo` for public repositories.
+- Use `--help` to view usage details for any command.

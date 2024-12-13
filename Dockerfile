@@ -1,14 +1,10 @@
 # Use an official Ubuntu image as the base
 FROM ubuntu:20.04
 
-ARG GITHUB_RUNNER_TOKEN
-ARG REPO_URL
-
 # Set environment variables to avoid interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install required dependencies
-
 RUN apt-get update && apt-get install -y \
     curl \
     tar \
@@ -41,15 +37,14 @@ tar xzf actions-runner.tar.gz && \
 rm -f actions-runner.tar.gz
 
 # Copy a script to configure the runner
-# COPY configure.sh /home/runner/configure.sh
-# RUN chmod +x configure.sh
+COPY configure.sh /home/runner/configure.sh
+RUN chmod +x configure.sh
 
 # Copy the requirements file into the image
 COPY requirements.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
 RUN bash /home/runner/bin/installdependencies.sh
 
 # Expose a port if needed (for debugging or remote access)
@@ -57,7 +52,5 @@ EXPOSE 8080
 
 USER runner
 
-RUN /home/runner/config.sh --unattended --token $GITHUB_RUNNER_TOKEN --url $REPO_URL
-
 # Entrypoint to start the runner
-ENTRYPOINT ["/home/runner/run.sh"]
+ENTRYPOINT ["bash"]
